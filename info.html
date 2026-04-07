@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>个人信息卡片</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, 'Segoe UI', 'Poppins', 'Roboto', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            background: var(--bg-gradient-start);
+            transition: background 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
+
+        /* 主题变量定义 (默认深海蓝) */
+        :root {
+            --bg-gradient-start: #e8eef4;
+            --bg-gradient-end: #d9e2ec;
+            --card-bg: #ffffff;
+            --header-bg-start: #2c3e66;
+            --header-bg-end: #1a2a44;
+            --accent-color: #2c3e66;
+            --accent-hover: #1f3255;
+            --accent-soft: #eef2fa;
+            --text-primary: #1e293b;
+            --text-secondary: #5b6e8c;
+            --text-light: #f8fafc;
+            --border-light: #e2e8f0;
+            --input-bg: #ffffff;
+            --shadow-color: rgba(0, 0, 0, 0.15);
+            --btn-glow: rgba(44, 62, 102, 0.3);
+            --avatar-border: #ffffff;
+        }
+
+        /* 主题 1 —— 暖橙色 */
+        body[data-theme="peach"] {
+            --bg-gradient-start: #fff3e6;
+            --bg-gradient-end: #ffe0cc;
+            --card-bg: #fffef7;
+            --header-bg-start: #e68a6e;
+            --header-bg-end: #c76e53;
+            --accent-color: #e07a5f;
+            --accent-hover: #c05f45;
+            --accent-soft: #fff0e8;
+            --border-light: #ffe0cc;
+            --btn-glow: rgba(224, 122, 95, 0.3);
+        }
+
+        /* 主题 2 —— 薄荷色 */
+        body[data-theme="mint"] {
+            --bg-gradient-start: #d9f0ec;
+            --bg-gradient-end: #c2e3de;
+            --card-bg: #ffffff;
+            --header-bg-start: #2f855a;
+            --header-bg-end: #1f6e4a;
+            --accent-color: #2a9d8f;
+            --accent-hover: #218277;
+            --accent-soft: #e6f4f1;
+            --border-light: #cfe9e3;
+            --btn-glow: rgba(42, 157, 143, 0.3);
+        }
+
+        /* 主题 3 —— 紫罗兰 */
+        body[data-theme="violet"] {
+            --bg-gradient-start: #ede8f5;
+            --bg-gradient-end: #ddd6f0;
+            --card-bg: #ffffff;
+            --header-bg-start: #6c5b7b;
+            --header-bg-end: #544a6b;
+            --accent-color: #7b6e9e;
+            --accent-hover: #655786;
+            --accent-soft: #f3effb;
+            --border-light: #e5ddf5;
+            --btn-glow: rgba(108, 91, 123, 0.3);
+        }
+
+        /* 主题 4 —— 暗夜色 */
+        body[data-theme="dark"] {
+            --bg-gradient-start: #1a202c;
+            --bg-gradient-end: #0f1419;
+            --card-bg: #242933;
+            --header-bg-start: #3b4259;
+            --header-bg-end: #2e3440;
+            --accent-color: #88c0d0;
+            --accent-hover: #6fa8bb;
+            --accent-soft: #2e3440;
+            --text-primary: #eceff4;
+            --text-secondary: #abb7c9;
+            --border-light: #3b4259;
+            --input-bg: #2e3440;
+            --shadow-color: rgba(0, 0, 0, 0.4);
+            --btn-glow: rgba(136, 192, 208, 0.3);
+            --avatar-border: #4c566a;
+        }
+
+        /* 卡片主容器 */
+        .card {
+            max-width: 620px;
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: 2rem;
+            box-shadow: 0 25px 40px -12px var(--shadow-color), 0 8px 18px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1), box-shadow 0.4s ease, background 0.3s;
+            animation: cardFloatIn 0.5s ease-out;
+        }
+
+        .card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 30px 50px -15px var(--shadow-color);
+        }
+
+        @keyframes cardFloatIn {
+            0% {
+                opacity: 0;
+                transform: translateY(25px) scale(0.96);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* 头部 */
+        .card-header {
+            background: linear-gradient(135deg, var(--header-bg-start), var(--header-bg-end));
+            padding: 1.2rem 1.8rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .card-header h1 {
+            color: white;
+            font-weight: 700;
+            font-size: 1.7rem;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        /* 主题切换栏 */
+        .theme-bar {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .theme-btn {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(4px);
+            border: none;
+            border-radius: 60px;
+            padding: 5px 16px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .theme-btn:hover {
+            transform: scale(1.05);
+            background: rgba(255,255,255,0.35);
+        }
+
+        /* 卡片主体 */
+        .card-body {
+            padding: 2rem 2rem 1.8rem;
+        }
+
+        /* 头像区域 */
+        .avatar-section {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1.8rem;
+        }
+
+        .avatar-wrapper {
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        .avatar-wrapper:hover {
+            transform: scale(1.02);
+        }
+
+        .avatar-img {
+            width: 110px;
+            height: 110px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 4px solid var(--avatar-border);
+            box-shadow: 0 10px 22px rgba(0, 0, 0, 0.12);
+            transition: all 0.25s;
+            background: #d9d9d9;
+        }
+
+        .avatar-wrapper:hover .avatar-img {
+            filter: brightness(0.94);
+            border-color: var(--accent-color);
+        }
+
+        .avatar-upload-hint {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background: var(--accent-color);
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            border: 2px solid var(--avatar-border);
+            pointer-events: none;
+        }
+
+        #avatarUpload {
+            display: none;
+        }
+
+        .info-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            /* 保证在大屏幕上同行，小屏时优雅换行 */
+            flex-wrap: nowrap;
+        }
+
+        /* 左侧标签样式 - 字体调小，更精致 */
+        .info-label {
+            width: 68px;
+            flex-shrink: 0;
+            font-weight: 600;
+            font-size: 0.85rem;      /* 字体稍微缩小，优雅不拥挤 */
+            color: var(--accent-color);
+            background: var(--accent-soft);
+            padding: 0.45rem 0.6rem;
+            border-radius: 2rem;
+            text-align: center;
+            transition: all 0.2s;
+            letter-spacing: 0.3px;
+        }
+
+        /* 可编辑区域容器 - 既是展示区也是输入区，合二为一 */
+        .editable-field {
+            flex: 1;
+            min-width: 0;
+            background: var(--input-bg);
+            border: 1.5px solid var(--border-light);
+            border-radius: 1.5rem;
+            padding: 0.7rem 1rem;
+            cursor: text;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .editable-field:hover {
+            border-color: var(--accent-color);
+            background: var(--accent-soft);
+            transform: translateY(-1px);
+        }
+
+        /* 显示模式样式 */
+        .field-display {
+            font-size: 0.92rem;
+            color: var(--text-primary);
+            font-weight: 500;
+            word-break: break-word;
+            line-height: 1.4;
+            min-height: 2.4rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .field-display .edit-icon {
+            opacity: 0;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            transition: opacity 0.2s;
+        }
+
+        .editable-field:hover .field-display .edit-icon {
+            opacity: 0.65;
+        }
+
+        /* 编辑模式样式 */
+        .field-input {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 0.92rem;
+            color: var(--text-primary);
+            font-weight: 500;
+            padding: 0;
+            margin: 0;
+            font-family: inherit;
+        }
+
+        .field-input::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.6;
+        }
+
+        /* 隐藏辅助类 */
+        .hidden {
+            display: none !important;
+        }
+
+        /* 保存按钮 */
+        .btn-save {
+            width: 100%;
+            background: linear-gradient(95deg, var(--accent-color), var(--accent-hover));
+            border: none;
+            padding: 0.9rem;
+            font-weight: 700;
+            font-size: 1rem;
+            color: white;
+            border-radius: 2.5rem;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 6px 12px -6px var(--shadow-color);
+            letter-spacing: 0.8px;
+            margin-top: 0.5rem;
+        }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.03);
+            box-shadow: 0 12px 20px -8px var(--shadow-color);
+        }
+        .btn-save:active {
+            transform: translateY(1px);
+        }
+
+        .ripple-effect {
+            animation: btnPop 0.2s ease-out;
+        }
+        @keyframes btnPop {
+            0% { transform: scale(0.97); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Toast提示 */
+        .toast-msg {
+            visibility: hidden;
+            min-width: 190px;
+            background: var(--accent-color);
+            color: white;
+            text-align: center;
+            border-radius: 40px;
+            padding: 10px 20px;
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.85rem;
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity 0.3s, visibility 0.3s;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+            z-index: 1000;
+            pointer-events: none;
+        }
+        .toast-msg.show {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .card-footer {
+            border-top: 1px solid var(--border-light);
+            padding: 0.9rem 2rem 1.2rem;
+            text-align: center;
+            font-size: 0.7rem;
+            color: var(--text-primary);
+            opacity: 0.7;
+        }
+
+        @media (max-width: 580px) {
+            .info-row {
+                flex-wrap: wrap;
+                gap: 0.6rem;
+            }
+            .info-label {
+                width: auto;
+                padding: 0.35rem 1rem;
+                font-size: 0.8rem;
+            }
+            .editable-field {
+                min-width: 100%;
+            }
+            .card-body {
+                padding: 1.5rem;
+            }
+        }
+
+        /* 保存成功微动画 */
+        @keyframes gentleFlash {
+            0% { background-color: var(--accent-soft); }
+            50% { background-color: var(--accent-color); color: white; }
+            100% { background-color: var(--accent-soft); }
+        }
+        .save-flash {
+            animation: gentleFlash 0.4s ease;
+        }
+
+        /* 额外：让左侧标签在深色主题下更柔和 */
+        body[data-theme="dark"] .info-label {
+            background: #3b4259;
+            color: #88c0d0;
+        }
+    </style>
+</head>
+<body data-theme="default">
+<div class="card">
+    <div class="card-header">
+        <h1>✨ 个人信息卡 ✨</h1>
+        <div class="theme-bar">
+            <button class="theme-btn" data-theme="default">深海蓝</button>
+            <button class="theme-btn" data-theme="peach">暖橙</button>
+            <button class="theme-btn" data-theme="mint">薄荷</button>
+            <button class="theme-btn" data-theme="violet">紫罗兰</button>
+            <button class="theme-btn" data-theme="dark">暗夜</button>
+        </div>
+    </div>
+
+    <div class="card-body">
+        <!-- 头像上传区域 -->
+        <div class="avatar-section">
+            <div class="avatar-wrapper" id="avatarWrapper">
+                <img class="avatar-img" id="profileAvatar" 
+                     src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%2388a9c7'/%3E%3Ccircle cx='50' cy='38' r='14' fill='%23ffffff' fill-opacity='0.9'/%3E%3Cpath d='M30 68 Q50 80 70 68' stroke='%23ffffff' stroke-width='5' fill='none' stroke-linecap='round' stroke-opacity='0.8' /%3E%3C/svg%3E"
+                     alt="头像">
+                <div class="avatar-upload-hint">📷</div>
+            </div>
+            <input type="file" id="avatarUpload" accept="image/jpeg, image/png, image/webp">
+        </div>
+
+        <!-- 姓名行：标签 + 可编辑区域（合二为一，既是显示也是输入） -->
+        <div class="info-row">
+            <span class="info-label">👤姓名</span>
+            <div class="editable-field" data-field="name">
+                <div class="field-display" id="nameDisplay">黄子杰</div>
+                <input type="text" class="field-input hidden" id="nameInput" placeholder="请输入姓名" value="黄子杰">
+            </div>
+        </div>
+
+        <!-- 简介行：标签 + 可编辑区域（合二为一） -->
+        <div class="info-row">
+            <span class="info-label">📝简介</span>
+            <div class="editable-field" data-field="bio">
+                <div class="field-display" id="bioDisplay">心怀山海，指尖造梦✨</div>
+                <input type="text" class="field-input hidden" id="bioInput" placeholder="一句话介绍自己" value="心怀山海，指尖造梦✨">
+            </div>
+        </div>
+
+        <!-- 保存按钮 - 点击后同步内容并显示保存成功 -->
+        <button class="btn-save" id="saveBtn">💾 保 存 修 改</button>
+    </div>
+    <div class="card-footer">
+        ✨ 多彩主题随心切换
+    </div>
+</div>
+<div id="toastMsg" class="toast-msg">✨ 更新成功 ✨</div>
+
+<script>
+    (function(){
+        // DOM 元素
+        const avatarImg = document.getElementById('profileAvatar');
+        const avatarUpload = document.getElementById('avatarUpload');
+        const avatarWrapper = document.getElementById('avatarWrapper');
+        
+        // 姓名相关
+        const nameDisplay = document.getElementById('nameDisplay');
+        const nameInput = document.getElementById('nameInput');
+        const nameField = document.querySelector('.editable-field[data-field="name"]');
+        
+        // 简介相关
+        const bioDisplay = document.getElementById('bioDisplay');
+        const bioInput = document.getElementById('bioInput');
+        const bioField = document.querySelector('.editable-field[data-field="bio"]');
+        
+        const saveBtn = document.getElementById('saveBtn');
+        const toastMsg = document.getElementById('toastMsg');
+
+        // 本地存储键名
+        const STORAGE_NAME = 'profile_name_val';
+        const STORAGE_BIO = 'profile_bio_val';
+        const STORAGE_AVATAR = 'profile_avatar_data';
+        const STORAGE_THEME = 'prefer_theme';
+
+        // 显示提示
+        function showMessage(text, duration = 1500) {
+            toastMsg.textContent = text;
+            toastMsg.classList.add('show');
+            setTimeout(() => {
+                toastMsg.classList.remove('show');
+            }, duration);
+        }
+
+        // 同步单个字段：从input同步到display（不触发存储，仅UI）
+        function syncField(inputEl, displayEl, fallbackText) {
+            let newVal = inputEl.value.trim();
+            if (newVal === "") {
+                displayEl.textContent = fallbackText;
+            } else {
+                displayEl.textContent = newVal;
+            }
+        }
+
+        // 全局保存：确保当前所有编辑提交 + 存储 + 反馈
+        function globalSave() {
+            // 1. 如果某个字段正处于编辑模式（输入框可见），则先提交它的更改到显示区
+            if (!nameDisplay.classList.contains('hidden')) {
+                // 显示模式，但输入框内可能还有未同步的值（正常情况应该已经同步，但为了安全，仍然用输入框值刷新显示）
+            }
+            if (!nameInput.classList.contains('hidden')) {
+                // 编辑模式中，手动提交姓名
+                let newName = nameInput.value.trim();
+                nameDisplay.textContent = newName === "" ? "未填写姓名" : newName;
+                nameDisplay.classList.remove('hidden');
+                nameInput.classList.add('hidden');
+            }
+            
+            if (!bioInput.classList.contains('hidden')) {
+                let newBio = bioInput.value.trim();
+                bioDisplay.textContent = newBio === "" ? "这个人很神秘，没有留下简介" : newBio;
+                bioDisplay.classList.remove('hidden');
+                bioInput.classList.add('hidden');
+            }
+            
+            // 2. 确保显示区内容与输入框值完全同步（因为可能在编辑时没有按回车直接点了保存，上面已经处理）
+            syncField(nameInput, nameDisplay, "未填写姓名");
+            syncField(bioInput, bioDisplay, "这个人很神秘，没有留下简介");
+            
+            // 3. 存储到 localStorage
+            localStorage.setItem(STORAGE_NAME, nameInput.value);
+            localStorage.setItem(STORAGE_BIO, bioInput.value);
+            
+            // 4. 添加视觉反馈动画
+            [nameField, bioField].forEach(field => {
+                field.classList.add('save-flash');
+                setTimeout(() => field.classList.remove('save-flash'), 400);
+            });
+            saveBtn.classList.add('ripple-effect');
+            setTimeout(() => saveBtn.classList.remove('ripple-effect'), 200);
+            showMessage("✅ 卡片信息已保存", 1400);
+        }
+
+        // 从存储加载数据并填充到输入框和显示区
+        function loadStoredData() {
+            const savedName = localStorage.getItem(STORAGE_NAME);
+            const savedBio = localStorage.getItem(STORAGE_BIO);
+            const savedAvatar = localStorage.getItem(STORAGE_AVATAR);
+            
+            if (savedName !== null) {
+                nameInput.value = savedName;
+                nameDisplay.textContent = savedName === "" ? "未填写姓名" : savedName;
+            } else {
+                nameDisplay.textContent = "黄子杰";
+                nameInput.value = "黄子杰";
+            }
+            
+            if (savedBio !== null) {
+                bioInput.value = savedBio;
+                bioDisplay.textContent = savedBio === "" ? "这个人很神秘，没有留下简介" : savedBio;
+            } else {
+                bioDisplay.textContent = "心怀山海，指尖造梦✨";
+                bioInput.value = "心怀山海，指尖造梦✨";
+            }
+            
+            if (savedAvatar && savedAvatar.startsWith('data:image')) {
+                avatarImg.src = savedAvatar;
+            }
+        }
+
+        // 头像上传处理
+        function handleAvatarUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (!file.type.startsWith('image/')) {
+                showMessage("❌ 请上传图片文件", 1200);
+                return;
+            }
+            if (file.size > 5 * 1024 * 1024) {
+                showMessage("⚠️ 图片不能超过5MB", 1200);
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                const imgData = ev.target.result;
+                avatarImg.src = imgData;
+                try {
+                    localStorage.setItem(STORAGE_AVATAR, imgData);
+                } catch(err) { console.warn("存储头像失败，可能图片过大"); }
+                showMessage("🖼️ 头像已更新", 1200);
+            };
+            reader.onerror = () => showMessage("读取失败", 1200);
+            reader.readAsDataURL(file);
+            avatarUpload.value = '';
+        }
+
+        // 内联编辑逻辑：点击显示区切换为输入框，失焦或回车保存当前项（实时更新显示，但不自动全局存储，保存按钮负责持久化）
+        function setupInlineEditing(displayEl, inputEl, fieldElement) {
+            // 点击显示区 -> 切换到编辑模式
+            displayEl.addEventListener('click', (e) => {
+                e.stopPropagation();
+                // 将当前显示文本同步到输入框（保证编辑起点正确）
+                inputEl.value = displayEl.textContent === "未填写姓名" ? "" : 
+                                 (displayEl.textContent === "这个人很神秘，没有留下简介" ? "" : displayEl.textContent);
+                // 显示输入框，隐藏显示区
+                displayEl.classList.add('hidden');
+                inputEl.classList.remove('hidden');
+                inputEl.focus();
+                // 选中全部文字方便编辑
+                inputEl.select();
+            });
+            
+            // 提交当前项的更改（同步显示区，但不会触发全局保存）
+            function commitEdit() {
+                let newVal = inputEl.value.trim();
+                if (newVal === "") {
+                    if (fieldElement === nameField) {
+                        displayEl.textContent = "未填写姓名";
+                    } else {
+                        displayEl.textContent = "这个人很神秘，没有留下简介";
+                    }
+                } else {
+                    displayEl.textContent = newVal;
+                }
+                // 切换回显示模式
+                displayEl.classList.remove('hidden');
+                inputEl.classList.add('hidden');
+            }
+            
+            // 失焦保存
+            inputEl.addEventListener('blur', commitEdit);
+            // 回车保存
+            inputEl.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    commitEdit();
+                }
+            });
+        }
+
+        // 主题切换功能
+        const themeBtns = document.querySelectorAll('.theme-btn');
+        const body = document.body;
+        
+        function setTheme(themeName) {
+            body.setAttribute('data-theme', themeName);
+            localStorage.setItem(STORAGE_THEME, themeName);
+            const accent = getComputedStyle(body).getPropertyValue('--accent-color').trim();
+            if(accent) toastMsg.style.backgroundColor = accent;
+            showMessage(`🎨 主题已切换`, 1000);
+        }
+        
+        function loadTheme() {
+            const savedTheme = localStorage.getItem(STORAGE_THEME);
+            if(savedTheme && ['default','peach','mint','violet','dark'].includes(savedTheme)) {
+                body.setAttribute('data-theme', savedTheme);
+            } else {
+                body.setAttribute('data-theme', 'default');
+            }
+            const accent = getComputedStyle(body).getPropertyValue('--accent-color').trim();
+            if(accent) toastMsg.style.backgroundColor = accent;
+        }
+        
+        themeBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const theme = btn.getAttribute('data-theme');
+                if(theme) setTheme(theme);
+            });
+        });
+
+        // 头像上传触发
+        avatarWrapper.addEventListener('click', () => avatarUpload.click());
+        avatarUpload.addEventListener('change', handleAvatarUpload);
+        saveBtn.addEventListener('click', globalSave);
+        
+        // 设置内联编辑（编辑实时改变显示区，保存按钮负责最终持久化）
+        setupInlineEditing(nameDisplay, nameInput, nameField);
+        setupInlineEditing(bioDisplay, bioInput, bioField);
+        
+        // 加载已存储数据（包括头像、姓名、简介）
+        loadStoredData();
+        loadTheme();
+        
+        // 监听主题变化更新toast颜色
+        const observer = new MutationObserver(() => {
+            const accent = getComputedStyle(body).getPropertyValue('--accent-color').trim();
+            if(accent) toastMsg.style.backgroundColor = accent;
+        });
+        observer.observe(body, { attributes: true, attributeFilter: ['data-theme'] });
+        
+        
+        console.log("✨ 个人信息卡片已启动");
+    })();
+</script>
+</body>
+</html>
